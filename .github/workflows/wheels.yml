@@ -37,48 +37,27 @@ jobs:
       matrix:
         os:
           - name: "ubuntu-24.04"
-            platform: "linux"
-            platform_id: "manylinux_x86_64"
-
           - name: "ubuntu-24.04-arm"
-            platform: "linux"
-            platform_id: "manylinux_aarch64"
-
           - name: "macos-14"
-            platform: "macos"
-            min_macos_version: "14"
-            platform_id: "macosx_arm64"
-
-          - name: "windows-2025"
-            platform: "windows"
-            platform_id: "win_amd64"
-
+          - name: "windows-20255"
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
-      - name: Set up QEMU
-        if: runner.os == 'Linux' && runner.arch == 'X64'
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: all
-
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.1
         env:
-          # 1. Enable PyPy builds (Required in v3+)
-          CIBW_ENABLE: pypy
-          # 2. Configure Architectures
-          CIBW_ARCHS_LINUX: ${{ runner.arch == 'X64' && 'auto ppc64le s390x' || 'auto armv7l' }}
-          CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
-          # SKIP ALL FREE-THREADING BUILDS (t-suffix)
-          CIBW_SKIP: "*t-*"
-          # 3. Build & Test Settings
-          CIBW_TEST_REQUIRES: tox
-          CIBW_TEST_COMMAND: cd {project} && tox
+          # Native architectures only
+          CIBW_ARCHS_LINUX: auto
+          CIBW_ARCHS_MACOS: auto
+          CIBW_ARCHS_WINDOWS: auto
+          # Skip PyPy and free-threaded builds
+          CIBW_SKIP: "pp* *t-*"
+          # Skip tests
           CIBW_TEST_SKIP: "*"
-          CIBW_BUILD_VERBOSITY: 1
+          # More verbose logs
+          CIBW_BUILD_VERBOSITY: 3
 
       - name: Store wheels
         uses: actions/upload-artifact@v4

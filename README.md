@@ -12,6 +12,11 @@ easy to install and use. dzgram-tgcrypto implements the cryptographic algorithms
 - **`AES-256-CTR`** - used for [CDN encrypted files](https://core.telegram.org/cdn).
 - **`AES-256-CBC`** - used for [encrypted passport credentials](https://core.telegram.org/passport).
 
+## Community
+
+- Channel: [@DZGramByDzone](https://t.me/DZGramByDzone)
+- Support Group: [@DzgramDiscussion](https://t.me/DzgramDiscussion)
+
 ## Requirements
 
 - Python 3.7 or higher.

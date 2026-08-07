@@ -63,6 +63,8 @@ setup(
     project_urls={
         "Source": "https://github.com/DownloaderZone/dzgram-tgcrypto",
         "Tracker": "https://github.com/DownloaderZone/dzgram-tgcrypto/issues",
+        "Channel": "https://t.me/DZGramByDzone",
+        "Support Group": "https://t.me/DzgramDiscussion",
     },
     python_requires="~=3.7",
     packages=find_packages(exclude=["tests*"]),

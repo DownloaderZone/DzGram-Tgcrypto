@@ -232,7 +232,7 @@ static PyMethodDef methods[] = {
 
 static struct PyModuleDef module = {
     PyModuleDef_HEAD_INIT,
-    "TgCrypto",
+    "dzgram-tgcrypto",
     DESCRIPTION,
     -1,
     methods

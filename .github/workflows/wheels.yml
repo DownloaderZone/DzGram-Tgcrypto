@@ -1,17 +1,35 @@
-name: Build wheels AND Upload Python Package
+name: Build wheels, tag and publish to PyPI
 
 on:
-  release:
-    types: [published]
-  push:
-    tags:
-    - '*'
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+  tag_release:
+    name: Create git tag
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      tag: ${{ steps.get_version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Read version from setup.py
+        id: get_version
+        run: |
+          version=$(sed -n 's/.*version="\([0-9.]*\)".*/\1/p' setup.py)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "${{ steps.get_version.outputs.tag }}"
+          git push origin "${{ steps.get_version.outputs.tag }}"
+
   build_wheels:
     name: Build wheels on ${{ matrix.os.name }}
     runs-on: ${{ matrix.os.name }}
@@ -69,8 +87,8 @@ jobs:
           path: ./wheelhouse/*.whl
 
   publish:
-    name: Publish wheels to PyPI
-    needs: build_wheels
+    name: Create release and publish to PyPI
+    needs: [tag_release, build_wheels]
     runs-on: ubuntu-latest
 
     steps:
@@ -94,7 +112,8 @@ jobs:
         uses: ncipollo/release-action@v1.14.0
         with:
           artifacts: "dist/*.whl"
-          tag: "dzgram-tgcrypto-${{ github.ref_name }}"
+          tag: ${{ needs.tag_release.outputs.tag }}
+          name: ${{ needs.tag_release.outputs.tag }}
           commit: ${{ github.sha }}
 
       - name: Publish wheels to PyPI

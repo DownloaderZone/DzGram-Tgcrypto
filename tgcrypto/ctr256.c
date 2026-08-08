@@ -22,11 +22,14 @@
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
-uint8_t *ctr256(const uint8_t in[], uint32_t length, const uint8_t key[32], uint8_t iv[16], uint8_t *state) {
+uint8_t *ctr256(const uint8_t in[], size_t length, const uint8_t key[32], uint8_t iv[16], uint8_t *state) {
     uint8_t *out = (uint8_t *) malloc(length * sizeof(uint8_t));
     uint8_t chunk[AES_BLOCK_SIZE];
     uint32_t expandedKey[EXPANDED_KEY_SIZE];
-    uint32_t i, j, k;
+    size_t i, j, k;
+
+    if (out == NULL)
+        return NULL;
 
     memcpy(out, in, length);
     aes256_set_encryption_key(key, expandedKey);

@@ -76,8 +76,9 @@ jobs:
           # Skip PyPy and free-threaded builds
           CIBW_SKIP: "pp* *t-*"
 
-          # Skip tests
-          CIBW_TEST_SKIP: "*"
+          # Run the test suite on the built wheels
+          CIBW_TEST_REQUIRES: "pytest"
+          CIBW_TEST_COMMAND: "python -m pytest {project}/tests -q"
 
           # More verbose logs
           CIBW_BUILD_VERBOSITY: 3

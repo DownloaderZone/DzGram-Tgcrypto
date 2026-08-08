@@ -20,12 +20,16 @@
 
 #include "aes256.h"
 
-uint8_t *ige256(const uint8_t in[], uint32_t length, const uint8_t key[32], const uint8_t iv[32], uint8_t encrypt) {
+uint8_t *ige256(const uint8_t in[], size_t length, const uint8_t key[32], const uint8_t iv[32], uint8_t encrypt) {
     uint8_t *out = (uint8_t *) malloc(length * sizeof(uint8_t));
     uint8_t iv1[AES_BLOCK_SIZE], iv2[AES_BLOCK_SIZE];
     uint8_t chunk[AES_BLOCK_SIZE], buffer[AES_BLOCK_SIZE];
     uint32_t expandedKey[EXPANDED_KEY_SIZE];
-    uint32_t i, j;
+    size_t i;
+    uint32_t j;
+
+    if (out == NULL)
+        return NULL;
 
     memcpy(encrypt ? iv1 : iv2, (uint8_t *) iv, AES_BLOCK_SIZE);
     memcpy(encrypt ? iv2 : iv1, (uint8_t *) iv + AES_BLOCK_SIZE, AES_BLOCK_SIZE);

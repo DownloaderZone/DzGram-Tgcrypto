@@ -31,7 +31,7 @@ setup(
     download_url="https://github.com/DownloaderZone/dzgram-tgcrypto/releases/latest",
     author="DownloaderZone",
     author_email="DownloaderZone@users.noreply.github.com",
-    license="LGPLv3+",
+    license="LGPL-3.0-or-later",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
@@ -68,7 +68,6 @@ setup(
     },
     python_requires="~=3.7",
     packages=find_packages(exclude=["tests*"]),
-    test_suite="tests",
     zip_safe=False,
     ext_modules=[
         Extension(

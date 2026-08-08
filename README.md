@@ -1,4 +1,4 @@
-# dzgram-tgcrypto
+# DzGram-Tgcrypto
 
 > [!NOTE]
 > The implementations of the algorithms presented in this repository are to be considered for educational purposes only.
@@ -7,6 +7,8 @@
 
 **dzgram-tgcrypto** is a Cryptography Library written in C as a Python extension. It is designed to be portable, fast,
 easy to install and use. dzgram-tgcrypto implements the cryptographic algorithms Telegram requires, namely:
+
+> dzgram-tgcrypto is part of [DzGram](https://github.com/DownloaderZone/DzGram), the unofficial Telegram client library for Python.
 
 - **`AES-256-IGE`** - used in [MTProto v2.0](https://core.telegram.org/mtproto).
 - **`AES-256-CTR`** - used for [CDN encrypted files](https://core.telegram.org/cdn).

@@ -23,7 +23,7 @@ with open("README.md", encoding="utf-8") as f:
 
 setup(
     name="dzgram-tgcrypto",
-    version="1.2.12",
+    version="1.2.13",
     description="Fast and Portable Cryptography Extension Library for Telegram",
     long_description=readme,
     long_description_content_type="text/markdown",

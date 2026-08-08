@@ -10,9 +10,11 @@ jobs:
   tag_release:
     name: Create git tag
     runs-on: ubuntu-latest
+
     outputs:
       version: ${{ steps.get_version.outputs.version }}
       tag: ${{ steps.get_version.outputs.tag }}
+
     steps:
       - uses: actions/checkout@v5
 
@@ -20,6 +22,12 @@ jobs:
         id: get_version
         run: |
           version=$(sed -n 's/.*version="\([0-9.]*\)".*/\1/p' setup.py)
+
+          if [ -z "$version" ]; then
+            echo "Could not find version in setup.py"
+            exit 1
+          fi
+
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
 
@@ -27,19 +35,31 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag "${{ steps.get_version.outputs.tag }}"
-          git push origin "${{ steps.get_version.outputs.tag }}"
+
+          TAG="${{ steps.get_version.outputs.tag }}"
+
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists. Skipping tag creation."
+          else
+            git tag "$TAG"
+            git push origin "$TAG"
+            echo "Created and pushed $TAG"
+          fi
 
   build_wheels:
     name: Build wheels on ${{ matrix.os.name }}
     runs-on: ${{ matrix.os.name }}
+
     strategy:
+      fail-fast: false
+
       matrix:
         os:
           - name: "ubuntu-24.04"
           - name: "ubuntu-24.04-arm"
           - name: "macos-14"
-          - name: "windows-20255"
+          - name: "windows-2025"
+
     steps:
       - uses: actions/checkout@v5
         with:
@@ -48,14 +68,17 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.1
         env:
-          # Native architectures only
+          # Build native architectures only
           CIBW_ARCHS_LINUX: auto
           CIBW_ARCHS_MACOS: auto
           CIBW_ARCHS_WINDOWS: auto
+
           # Skip PyPy and free-threaded builds
           CIBW_SKIP: "pp* *t-*"
+
           # Skip tests
           CIBW_TEST_SKIP: "*"
+
           # More verbose logs
           CIBW_BUILD_VERBOSITY: 3
 
@@ -64,10 +87,14 @@ jobs:
         with:
           name: dist-${{ matrix.os.name }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
+          if-no-files-found: error
 
   publish:
     name: Create release and publish to PyPI
-    needs: [tag_release, build_wheels]
+    needs:
+      - tag_release
+      - build_wheels
+
     runs-on: ubuntu-latest
 
     steps:
@@ -77,15 +104,26 @@ jobs:
           pattern: dist-*
           path: dist
 
-      - name: Setup python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install Twine
         run: |
-          pip install twine
-          cd dist && for i in $(ls); do mv ${i}/*.whl .; rmdir ${i}; done && cd ..
+          python -m pip install --upgrade pip
+          python -m pip install twine
+
+      - name: Flatten wheel artifacts
+        shell: bash
+        run: |
+          find dist -type f -name "*.whl" -exec mv {} dist/ \;
+          find dist -mindepth 1 -type d -empty -delete
+
+      - name: Show built wheels
+        run: |
+          echo "Wheels to publish:"
+          ls -lh dist/*.whl
 
       - name: Create Release
         uses: ncipollo/release-action@v1.14.0
@@ -96,7 +134,7 @@ jobs:
           commit: ${{ github.sha }}
 
       - name: Publish wheels to PyPI
-        run: twine upload dist/*
+        run: python -m twine upload dist/*.whl
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
